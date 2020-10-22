@@ -1,0 +1,40 @@
+service: pack-calc-go
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: eu-west-1
+  apiGateway:
+    apiKeySourceType: HEADER
+  apiKeys:
+      - public:
+          - publicKey
+  usagePlan:
+      - public:
+          quota:
+              limit: 10000
+              period: MONTH
+          throttle:
+              burstLimit: 10
+              rateLimit: 1
+
+package:
+  exclude:
+    - ./**
+  include:
+    - ./bin/**
+
+functions:
+  calculate:
+    handler: bin/handler
+    events:
+      - http:
+          path: calculate
+          method: post
+          request:
+              schema:
+                  application/json: ${file(request_schema.json)}
+          private: true

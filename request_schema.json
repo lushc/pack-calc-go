@@ -1,0 +1,20 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "title": "Pack Calc Request Schema",
+  "required": ["quantity", "packSizes"],
+  "properties": {
+    "quantity": {
+      "description": "The number of items ordered",
+      "type": "integer"
+    },
+    "packSizes": {
+      "description": "The pack sizes available",
+      "type": "array",
+      "items": {
+          "type": "integer"
+      }
+    }
+  }
+}
