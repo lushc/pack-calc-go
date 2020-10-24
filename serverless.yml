@@ -12,6 +12,8 @@ provider:
   apiKeys:
       - public:
           - publicKey
+      - private:
+          - privateKey
   usagePlan:
       - public:
           quota:
@@ -20,7 +22,13 @@ provider:
           throttle:
               burstLimit: 10
               rateLimit: 1
-
+      - private:
+          quota:
+              limit: 10000
+              period: DAY
+          throttle:
+              burstLimit: 1
+              rateLimit: 1
 package:
   exclude:
     - ./**
