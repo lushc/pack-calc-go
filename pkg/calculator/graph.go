@@ -81,10 +81,8 @@ func (g *quantityGraph) subtractPacks(n quantityNode, packSizes []int) {
 
 		// maintain unique weights for edges between two quantities to avoid unnecessary recalculations
 		weight := float64(size)
-		for _, line := range graph.WeightedLinesOf(g.WeightedLines(n.ID(), nextNode.ID())) {
-			if line.Weight() == weight {
-				continue
-			}
+		if g.hasWeightedLineFromTo(n, nextNode, weight) {
+			continue
 		}
 
 		// link the nodes by pack size
@@ -99,6 +97,15 @@ func (g *quantityGraph) subtractPacks(n quantityNode, packSizes []int) {
 		// subtract from the next quantity, increasing depth
 		g.subtractPacks(nextNode, packSizes)
 	}
+}
+
+func (g *quantityGraph) hasWeightedLineFromTo(from graph.Node, to graph.Node, weight float64) bool {
+	for _, line := range graph.WeightedLinesOf(g.WeightedLines(from.ID(), to.ID())) {
+		if line.Weight() == weight {
+			return true
+		}
+	}
+	return false
 }
 
 func (n quantityNode) ID() int64 {
