@@ -4,29 +4,52 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/lushc/pack-calc-go/pkg/calculator"
 )
 
+// Request is of type APIGatewayProxyRequest since we're leveraging the
+// AWS Lambda Proxy Request functionality (default behavior)
+type Request events.APIGatewayProxyRequest
+
 // Response is of type APIGatewayProxyResponse since we're leveraging the
 // AWS Lambda Proxy Request functionality (default behavior)
-//
-// https://serverless.com/framework/docs/providers/aws/events/apigateway/#lambda-proxy-integration
 type Response events.APIGatewayProxyResponse
 
-// Handler is our lambda handler invoked by the `lambda.Start` function call
-func Handler(ctx context.Context) (Response, error) {
-	var buf bytes.Buffer
+// Parameters are those sent in the Request body
+type Parameters struct {
+	Quantity  int
+	PackSizes []int
+}
 
-	body, err := json.Marshal(map[string]interface{}{
-		"message": fmt.Sprintf("The smallest number is: %d", calculator.IntMin(2, -2)),
-	})
+// Handler is our lambda handler invoked by the `lambda.Start` function call
+func Handler(ctx context.Context, req Request) (Response, error) {
+	// decode request parameters
+	var params Parameters
+	err := json.Unmarshal([]byte(req.Body), &params)
+	if err != nil {
+		return Response{StatusCode: 400}, err
+	}
+
+	// decide which calculator to use based on available pack sizes
+	var packs calculator.PackCalculator
+	if len(params.PackSizes) == 1 {
+		packs = calculator.SimplePackCalculator{PackSize: params.PackSizes[0]}
+	} else {
+		// TODO
+	}
+
+	// TODO: validate parameters
+	response := packs.Calculate(params.Quantity)
+
+	body, err := json.Marshal(response)
 	if err != nil {
 		return Response{StatusCode: 404}, err
 	}
+
+	var buf bytes.Buffer
 	json.HTMLEscape(&buf, body)
 
 	resp := Response{
