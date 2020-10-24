@@ -11,9 +11,16 @@ func TestSimplePackCalculator(t *testing.T) {
 		quantity int
 		want     RequiredPacks
 	}{
+		// zero quantity
 		{SimplePackCalculator{250}, 0, RequiredPacks{250: 0}},
+		// negative quantity
+		{SimplePackCalculator{250}, -250, RequiredPacks{250: 0}},
+		// single pack
 		{SimplePackCalculator{250}, 250, RequiredPacks{250: 1}},
-		{SimplePackCalculator{250}, 251, RequiredPacks{250: 2}},
+		// divisible
+		{SimplePackCalculator{50}, 500, RequiredPacks{50: 10}},
+		// undivisible
+		{SimplePackCalculator{33}, 500, RequiredPacks{33: 16}},
 	}
 
 	for _, c := range cases {

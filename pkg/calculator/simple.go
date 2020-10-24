@@ -10,6 +10,7 @@ type SimplePackCalculator struct {
 // Calculate the required number of packs
 func (c SimplePackCalculator) Calculate(quantity int) RequiredPacks {
 	packs := make(RequiredPacks)
-	packs[c.PackSize] = int(math.Ceil(float64(quantity) / float64(c.PackSize)))
+	required := math.Ceil(float64(quantity) / float64(c.PackSize))
+	packs[c.PackSize] = int(math.Max(required, 0))
 	return packs
 }
