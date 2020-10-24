@@ -6,6 +6,7 @@ import (
 
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/multi"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 // GraphPackCalculator generates a graph of quantity permutations with the available pack sizes
@@ -46,21 +47,38 @@ func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
 	}
 
 	// create a graph with the initial quantity as root node
-	graph := quantityGraph{
+	qGraph := quantityGraph{
 		packSizeCount:         len(sizes),
 		candidates:            make(map[int]quantityNode),
 		WeightedDirectedGraph: multi.NewWeightedDirectedGraph(),
 	}
-	root := quantityNode{quantity}
-	graph.AddNode(root)
+	rootNode := quantityNode{quantity}
+	qGraph.AddNode(rootNode)
 
 	// generate permutations by recursively subtracting packs, reducing the available packs each iteration
 	for len(sizes) > 0 {
-		graph.subtractPacks(root, sizes)
+		qGraph.subtractPacks(rootNode, sizes)
 		sizes = sizes[:len(sizes)-1]
 	}
 
-	// TODO: find the shortest path to the quantity closest to zero, counting pack sizes
+	// find the shortest path to the quantity closest to zero
+	// TODO: aid traversal by removing vertices & edges which don't lead to the candidate
+	candidateNode := qGraph.closestCandidate()
+	shortest, _ := path.AStar(rootNode, candidateNode, qGraph, nil)
+	path, _ := shortest.To(candidateNode.ID())
+	pathLength := len(path)
+
+	// count each weighted line that forms the path as a used pack size
+	for i, currentNode := range path {
+		nextIndex := i + 1
+		if nextIndex >= pathLength {
+			break
+		}
+
+		lines := qGraph.WeightedLines(currentNode.ID(), path[nextIndex].ID())
+		lines.Next()
+		packs[int(lines.WeightedLine().Weight())]++
+	}
 
 	return packs
 }
@@ -106,6 +124,21 @@ func (g *quantityGraph) hasWeightedLineFromTo(from graph.Node, to graph.Node, we
 		}
 	}
 	return false
+}
+
+func (g *quantityGraph) closestCandidate() quantityNode {
+	// create a slice of quantities from the map keys
+	quantities := make([]int, len(g.candidates))
+	i := 0
+	for k := range g.candidates {
+		quantities[i] = k
+		i++
+	}
+
+	// reverse sort so the closest candidate is first
+	sort.Sort(sort.Reverse(sort.IntSlice(quantities)))
+
+	return g.candidates[quantities[0]]
 }
 
 func (n quantityNode) ID() int64 {
