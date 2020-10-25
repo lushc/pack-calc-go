@@ -38,15 +38,14 @@ func Handler(ctx context.Context, req Request) (Response, error) {
 	if len(params.PackSizes) == 1 {
 		packs = calculator.SimplePackCalculator{PackSize: params.PackSizes[0]}
 	} else {
-		// TODO
+		packs = calculator.GraphPackCalculator{PackSizes: params.PackSizes}
 	}
 
 	// TODO: validate parameters
 	response := packs.Calculate(params.Quantity)
-
 	body, err := json.Marshal(response)
 	if err != nil {
-		return Response{StatusCode: 404}, err
+		return Response{StatusCode: 500}, err
 	}
 
 	var buf bytes.Buffer
