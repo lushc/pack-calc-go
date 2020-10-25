@@ -55,10 +55,13 @@ func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
 	rootNode := quantityNode{quantity}
 	qGraph.AddNode(rootNode)
 
-	// generate permutations by recursively subtracting packs, reducing the available packs each iteration
-	for len(sizes) > 0 {
-		qGraph.subtractPacks(rootNode, sizes)
-		sizes = sizes[:len(sizes)-1]
+	// generate permutations by recursively subtracting packs, with pack sizes cascading in descending order
+	// e.g. [5 4 3 2 1] -> [4 3 2 1] -> [3 2 1] -> [2 1] -> [1]
+	for i := len(sizes); i >= 1; i-- {
+		availableSizes := make([]int, i)
+		copy(availableSizes, sizes[:i])
+		sort.Sort(sort.Reverse(sort.IntSlice(availableSizes)))
+		qGraph.subtractPacks(rootNode, availableSizes)
 	}
 
 	// find the shortest path to the quantity closest to zero
