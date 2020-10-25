@@ -64,9 +64,11 @@ func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
 		qGraph.subtractPacks(rootNode, availableSizes)
 	}
 
-	// find the shortest path to the quantity closest to zero
-	// TODO: aid traversal by removing vertices & edges which don't lead to the candidate
+	// aid traversal by removing unnecessary nodes
 	candidateNode := qGraph.closestCandidate()
+	qGraph.pruneNodes(candidateNode)
+
+	// find the shortest path to the quantity closest to zero
 	shortest, _ := path.AStar(rootNode, candidateNode, qGraph, nil)
 	path, _ := shortest.To(candidateNode.ID())
 	pathLength := len(path)
@@ -146,6 +148,31 @@ func (g *quantityGraph) closestCandidate() quantityNode {
 	sort.Sort(sort.Reverse(sort.IntSlice(quantities)))
 
 	return g.candidates[quantities[0]]
+}
+
+func (g *quantityGraph) pruneNodes(candidate graph.Node) {
+	// remove other candidates from the graph
+	for _, node := range g.candidates {
+		if node != candidate {
+			g.RemoveNode(node.ID())
+		}
+	}
+
+	// remove nodes which don't have any edges going out
+	var retraverse bool
+	for {
+		retraverse = false
+		it := g.Nodes()
+		for it.Next() {
+			if node := it.Node(); node != candidate && len(graph.NodesOf(g.From(node.ID()))) == 0 {
+				g.RemoveNode(node.ID())
+				retraverse = true
+			}
+		}
+		if !retraverse {
+			break
+		}
+	}
 }
 
 func (n quantityNode) ID() int64 {
