@@ -31,18 +31,23 @@ func Handler(ctx context.Context, req Request) (Response, error) {
 	var body []byte
 	var buf bytes.Buffer
 
-	// decode request parameters
-	err := json.Unmarshal([]byte(req.Body), &params)
-	if err != nil {
-		return Response{StatusCode: 500}, err
-	}
-
 	resp := Response{
 		StatusCode:      200,
 		IsBase64Encoded: false,
 		Headers: map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type":                     "application/json",
+			"Access-Control-Allow-Headers":     "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+			"Access-Control-Allow-Origin":      "*",
+			"Access-Control-Allow-Methods":     "GET,PUT,POST,DELETE,HEAD,OPTIONS",
+			"Access-Control-Allow-Credentials": "true",
 		},
+	}
+
+	// decode request parameters
+	err := json.Unmarshal([]byte(req.Body), &params)
+	if err != nil {
+		resp.StatusCode = 500
+		return resp, err
 	}
 
 	// decide which calculator to use based on available pack sizes
@@ -65,7 +70,8 @@ func Handler(ctx context.Context, req Request) (Response, error) {
 	}
 
 	if err != nil {
-		return Response{StatusCode: 500}, err
+		resp.StatusCode = 500
+		return resp, err
 	}
 
 	json.HTMLEscape(&buf, body)

@@ -45,4 +45,5 @@ functions:
           request:
               schema:
                   application/json: ${file(request_schema.json)}
+          cors: true
           private: true
