@@ -87,12 +87,12 @@ func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
 }
 
 func (g *quantityGraph) subtractPacks(n quantityNode, packSizes []int) {
-	for _, size := range packSizes {
-		// stop generating permutations if we've found more paths to 0 than available pack sizes
-		if nodesToZero := g.To(int64(0)); nodesToZero.Len() >= g.packSizeCount {
-			break
-		}
+	// stop generating permutations if we've found more paths to 0 than available pack sizes
+	if nodesToZero := g.To(int64(0)); nodesToZero.Len() >= g.packSizeCount {
+		return
+	}
 
+	for _, size := range packSizes {
 		// find or create a node by the subtracted quantity
 		nextQuantity := n.quantity - size
 		nextNode := quantityNode{nextQuantity}
