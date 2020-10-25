@@ -63,7 +63,7 @@ func Handler(ctx context.Context, req Request) (Response, error) {
 	if err != nil {
 		resp.StatusCode = 400
 		body, err = json.Marshal(map[string]interface{}{
-			"error": err.Error(),
+			"message": err.Error(),
 		})
 	} else {
 		body, err = json.Marshal(packs)
