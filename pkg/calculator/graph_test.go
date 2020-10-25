@@ -42,10 +42,31 @@ func TestGraphPackCalculator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := c.packs.Calculate(c.quantity)
+		got, _ := c.packs.Calculate(c.quantity)
 
 		if !reflect.DeepEqual(got, c.want) {
 			t.Errorf("%+v.Calculate(%v) == %v, want %v", c.packs, c.quantity, got, c.want)
+		}
+	}
+}
+
+func TestGraphPackCalculatorInvalidArguments(t *testing.T) {
+	cases := []struct {
+		packs PackCalculator
+	}{
+		// no pack sizes
+		{GraphPackCalculator{[]int{}}},
+		// zero pack size
+		{GraphPackCalculator{[]int{0}}},
+		// negative pack size
+		{GraphPackCalculator{[]int{-250}}},
+	}
+
+	for _, c := range cases {
+		got, err := c.packs.Calculate(0)
+
+		if err == nil {
+			t.Errorf("%+v.Calculate() == %v, expected error", c.packs, got)
 		}
 	}
 }

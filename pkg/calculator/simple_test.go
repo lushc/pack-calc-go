@@ -24,10 +24,31 @@ func TestSimplePackCalculator(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		got := c.packs.Calculate(c.quantity)
+		got, _ := c.packs.Calculate(c.quantity)
 
 		if !reflect.DeepEqual(got, c.want) {
 			t.Errorf("%+v.Calculate(%v) == %v, want %v", c.packs, c.quantity, got, c.want)
+		}
+	}
+}
+
+func TestSimplePackCalculatorInvalidArguments(t *testing.T) {
+	cases := []struct {
+		packs PackCalculator
+	}{
+		// no pack size
+		{SimplePackCalculator{}},
+		// zero pack size
+		{SimplePackCalculator{0}},
+		// negative pack size
+		{SimplePackCalculator{-250}},
+	}
+
+	for _, c := range cases {
+		got, err := c.packs.Calculate(0)
+
+		if err == nil {
+			t.Errorf("%+v.Calculate() == %v, expected error", c.packs, got)
 		}
 	}
 }

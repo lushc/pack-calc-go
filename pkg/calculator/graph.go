@@ -4,6 +4,7 @@ import (
 	"math"
 	"sort"
 
+	"github.com/go-playground/validator"
 	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/multi"
 	"gonum.org/v1/gonum/graph/path"
@@ -11,7 +12,7 @@ import (
 
 // GraphPackCalculator generates a graph of quantity permutations with the available pack sizes
 type GraphPackCalculator struct {
-	PackSizes []int
+	PackSizes []int `validate:"required,min=1,dive,gt=0"`
 }
 
 // multigraph of quantities, allowing for multiple weights (lines) between two nodes (edge)
@@ -28,11 +29,16 @@ type quantityNode struct {
 const headroomMultiplier int = 50
 
 // Calculate the required number of packs
-func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
+func (c GraphPackCalculator) Calculate(quantity int) (RequiredPacks, error) {
+	err := validator.New().Struct(c)
+	if err != nil {
+		return nil, err.(validator.ValidationErrors)
+	}
+
 	packs := make(RequiredPacks)
 
 	if quantity <= 0 {
-		return packs
+		return packs, nil
 	}
 
 	sizes := c.PackSizes
@@ -85,7 +91,7 @@ func (c GraphPackCalculator) Calculate(quantity int) RequiredPacks {
 		packs[int(lines.WeightedLine().Weight())]++
 	}
 
-	return packs
+	return packs, nil
 }
 
 func (g *quantityGraph) subtractPacks(n quantityNode, packSizes []int) {

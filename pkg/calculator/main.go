@@ -2,7 +2,7 @@ package calculator
 
 // PackCalculator returns the packs required to satisfy a quantity of items
 type PackCalculator interface {
-	Calculate(quantity int) RequiredPacks
+	Calculate(quantity int) (RequiredPacks, error)
 }
 
 // RequiredPacks is a map of pack sizes and the number required
