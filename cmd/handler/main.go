@@ -26,39 +26,50 @@ type Parameters struct {
 
 // Handler is our lambda handler invoked by the `lambda.Start` function call
 func Handler(ctx context.Context, req Request) (Response, error) {
-	// decode request parameters
 	var params Parameters
+	var pc calculator.PackCalculator
+	var body []byte
+	var buf bytes.Buffer
+
+	// decode request parameters
 	err := json.Unmarshal([]byte(req.Body), &params)
-	if err != nil {
-		return Response{StatusCode: 400}, err
-	}
-
-	// decide which calculator to use based on available pack sizes
-	var packs calculator.PackCalculator
-	if len(params.PackSizes) == 1 {
-		packs = calculator.SimplePackCalculator{PackSize: params.PackSizes[0]}
-	} else {
-		packs = calculator.GraphPackCalculator{PackSizes: params.PackSizes}
-	}
-
-	// TODO: validate parameters
-	response := packs.Calculate(params.Quantity)
-	body, err := json.Marshal(response)
 	if err != nil {
 		return Response{StatusCode: 500}, err
 	}
 
-	var buf bytes.Buffer
-	json.HTMLEscape(&buf, body)
-
 	resp := Response{
 		StatusCode:      200,
 		IsBase64Encoded: false,
-		Body:            buf.String(),
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
 	}
+
+	// decide which calculator to use based on available pack sizes
+	if len(params.PackSizes) == 1 {
+		pc = calculator.SimplePackCalculator{PackSize: params.PackSizes[0]}
+	} else {
+		pc = calculator.GraphPackCalculator{PackSizes: params.PackSizes}
+	}
+
+	packs, err := pc.Calculate(params.Quantity)
+
+	// prepare the payload
+	if err != nil {
+		resp.StatusCode = 400
+		body, err = json.Marshal(map[string]interface{}{
+			"error": err.Error(),
+		})
+	} else {
+		body, err = json.Marshal(packs)
+	}
+
+	if err != nil {
+		return Response{StatusCode: 500}, err
+	}
+
+	json.HTMLEscape(&buf, body)
+	resp.Body = buf.String()
 
 	return resp, nil
 }
