@@ -126,6 +126,10 @@ func (g *quantityGraph) hasWeightedLineFromTo(from graph.Node, to graph.Node, we
 	return false
 }
 
+func (g quantityGraph) Weight(xid, yid int64) (w float64, ok bool) {
+	return path.UniformCost(g)(xid, yid)
+}
+
 func (g *quantityGraph) closestCandidate() quantityNode {
 	// create a slice of quantities from the map keys
 	quantities := make([]int, len(g.candidates))
