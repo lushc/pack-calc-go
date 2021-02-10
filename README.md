@@ -28,6 +28,31 @@ Reference the container name with `docker exec` to run arbitary commands, e.g. f
 docker exec -it pack-calc-go-dev gofmt -s -w .
 ```
 
+## Benchmarks
+
+```
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_1-12                             40418             29614 ns/op           19297 B/op        305 allocs/op
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_250-12                           40042             29918 ns/op           19554 B/op        309 allocs/op
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_251-12                           30428             39265 ns/op           24827 B/op        367 allocs/op
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_501-12                           23762             50416 ns/op           30924 B/op        476 allocs/op
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_12001-12                          1866            643788 ns/op          324358 B/op       7207 allocs/op
+BenchmarkGraphPackCalculator_Calculate/default_packs_with_47501043056-12                      44          25187338 ns/op        11692241 B/op     278826 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_packs_with_32-12                              23742             50508 ns/op           32424 B/op        443 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_packs_with_500-12                               232           5101087 ns/op         2689115 B/op      43820 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_packs_with_758-12                               100          10396431 ns/op         4916666 B/op      94367 allocs/op
+BenchmarkGraphPackCalculator_Calculate/off_by_one_pack_with_500-12                           358           3344326 ns/op         1950087 B/op      27037 allocs/op
+BenchmarkGraphPackCalculator_Calculate/edge_case_pack_permutation-12                        8546            139276 ns/op           82748 B/op       1346 allocs/op
+BenchmarkGraphPackCalculator_Calculate/choose_smallest_pack_count-12                         120          10056510 ns/op         4630608 B/op      90139 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_stress_test-12                                   88          13814504 ns/op         6747548 B/op     127597 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_stress_test_with_3_sizes-12                     667           1793968 ns/op         1106331 B/op      16703 allocs/op
+BenchmarkGraphPackCalculator_Calculate/prime_stress_test_with_2_sizes-12                     361           3298535 ns/op         1814290 B/op      32965 allocs/op
+BenchmarkSimplePackCalculator_Calculate/zero_quantity-12                                   77960             15231 ns/op           10822 B/op        139 allocs/op
+BenchmarkSimplePackCalculator_Calculate/negative_quantity-12                               78458             15038 ns/op           10821 B/op        139 allocs/op
+BenchmarkSimplePackCalculator_Calculate/single_pack-12                                     77690             15082 ns/op           10822 B/op        139 allocs/op
+BenchmarkSimplePackCalculator_Calculate/divisible-12                                       77738             15116 ns/op           10822 B/op        139 allocs/op
+BenchmarkSimplePackCalculator_Calculate/indivisible-12                                     77396             15165 ns/op           10823 B/op        139 allocs/op
+```
+
 ## Microservice deployment
 
 The [Serverless framework](https://serverless.com/) is used for a microservice deployment:
